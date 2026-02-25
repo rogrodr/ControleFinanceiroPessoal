@@ -8,17 +8,17 @@ Sistema Fullstack completo para gestão de finanças pessoais, unindo uma arquit
 ## 📸 Demonstração do Sistema
 
 ### Dashboard e Inteligência de Dados (Chart.js)
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./screenshots/dashboard.jpeg)
 
 ### Gestão de Crédito e Organização
 <p align="center">
-  <img src="./screenshots/emprestimos.png" width="48%" title="Controle de Empréstimos" />
-  <img src="./screenshots/lembretes.png" width="48%" title="Lembretes Financeiros" />
+  <img src="./screenshots/emprestimos.jpeg" width="48%" title="Controle de Empréstimos" />
+  <img src="./screenshots/lembretes.jpeg" width="48%" title="Lembretes Financeiros" />
 </p>
 
 ### Movimentações e Relatórios Profissionais
-![Movimentos](./screenshots/movimentos.png)
-![Relatório PDF](./screenshots/relatorio.png)
+![Movimentos](./screenshots/movimentos.jpeg)
+![Relatório PDF](./screenshots/relatorio.jpeg)
 
 ### Segurança e Acesso à Conta
 <p align="center">
