@@ -18,12 +18,12 @@ Sistema Fullstack completo para gestão de finanças pessoais, unindo uma arquit
 
 ### Movimentações e Relatórios Profissionais
 ![Movimentos](./screenshots/movimentos.jpeg)
-![Relatório PDF](./screenshots/relatorio.jpeg)
+![Relatório PDF](./screenshots/relatorio.jpg)
 
 ### Segurança e Acesso à Conta
 <p align="center">
-  <img src="./screenshots/login.png" width="48%" />
-  <img src="./screenshots/registrar.png" width="48%" />
+  <img src="./screenshots/login.jpeg" width="48%" />
+  <img src="./screenshots/registrar.jpeg" width="48%" />
 </p>
 
 ---
