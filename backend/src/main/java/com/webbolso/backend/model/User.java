@@ -2,7 +2,6 @@ package com.webbolso.backend.model;
 
 import jakarta.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -20,11 +19,12 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    private Set<String> roles;
+    // ============================================
+    // CAMPO 'roles' REMOVIDO - Não é mais necessário
+    // O sistema usa apenas autenticação simples
+    // ============================================
 
+    // Relacionamentos com outras entidades
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Meta> metas;
 
@@ -35,8 +35,12 @@ public class User {
     private List<Lembrete> lembretes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Despesa> despesas;
+    private List<Movimento> contas;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EmprestimoFinanciamento> emprestimosFinanciamentos;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -69,13 +73,9 @@ public class User {
         this.email = email;
     }
 
-    public Set<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
+    // ============================================
+    // GETTERS/SETTERS DE 'roles' REMOVIDOS
+    // ============================================
 
     public List<Meta> getMetas() {
         return metas;
@@ -97,15 +97,23 @@ public class User {
         return lembretes;
     }
 
-        public void setLembretes(List<Lembrete> lembretes) {
+    public void setLembretes(List<Lembrete> lembretes) {
         this.lembretes = lembretes;
     }
 
-    public List<Despesa> getDespesas() {
-        return despesas;
+    public List<Movimento> getContas() {
+        return contas;
     }
 
-    public void setDespesas(List<Despesa> despesas) {
-        this.despesas = despesas;
+    public void setContas(List<Movimento> contas) {
+        this.contas = contas;
+    }
+
+    public List<EmprestimoFinanciamento> getEmprestimosFinanciamentos() {
+        return emprestimosFinanciamentos;
+    }
+
+    public void setEmprestimosFinanciamentos(List<EmprestimoFinanciamento> emprestimosFinanciamentos) {
+        this.emprestimosFinanciamentos = emprestimosFinanciamentos;
     }
 }

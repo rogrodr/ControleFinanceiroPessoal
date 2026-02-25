@@ -1,4 +1,3 @@
-
 package com.webbolso.backend.service;
 
 import com.webbolso.backend.dto.UserLoginDTO;
@@ -9,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -28,9 +25,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEmail(dto.getEmail());
         
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        user.setRoles(roles);
+        // ============================================
+        // CÓDIGO DE ROLES REMOVIDO
+        // Não é mais necessário definir roles no registro
+        // ============================================
         
         return userRepository.save(user);
     }

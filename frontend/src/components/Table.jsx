@@ -1,3 +1,5 @@
+// src/components/Table.js
+
 import React from 'react';
 
 // Componente genérico para exibição de tabelas
@@ -23,24 +25,32 @@ function Table({ data, columns, onEdit, onDelete }) {
         </thead>
         <tbody>
           {data.map((row, rowIndex) => {
-            // Adicionado verificação para garantir que 'row' não é null/undefined
             if (!row) {
               console.warn('Item nulo encontrado na lista de dados da tabela. Pulando:', rowIndex);
-              return null; // Não renderiza esta linha
+              return null; 
             }
-            // Use row.id como chave principal, garantindo que seja um valor único e estável.
-            // Se row.id for null ou undefined (o que não deveria acontecer se o backend estiver ok),
-            // um fallback para rowIndex é usado, mas isso pode causar problemas com reordenação/filtragem.
-            // O ideal é que todos os itens do backend sempre tenham um ID.
             const rowKey = row.id != null ? row.id : `fallback-${rowIndex}`; 
             
             return (
               <tr key={rowKey} className="border-b border-gray-200 hover:bg-gray-50">
-                {columns.map((col, colIndex) => (
-                  <td key={colIndex} className="py-3 px-4 text-gray-800">
-                    {col.accessor(row)}
-                  </td>
-                ))}
+                {columns.map((col, colIndex) => {
+                  // --- ATUALIZAÇÃO AQUI ---
+                  // Pega o valor usando o accessor
+                  const value = col.accessor(row);
+                  
+                  return (
+                    <td key={colIndex} className="py-3 px-4 text-gray-800">
+                      {/* Verifica se a coluna tem um renderizador 'cell' customizado.
+                        Se tiver, usa ele. Senão, usa só o valor do 'accessor'.
+                        Isso permite que as colunas 'Tipo' e 'Valor' em movimentosPage
+                        sejam renderizadas de forma customizada (com cores).
+                      */}
+                      {col.cell ? col.cell(value, row) : value}
+                    </td>
+                  );
+                  // --- FIM DA ATUALIZAÇÃO ---
+                })}
+
                 {(onEdit || onDelete) && (
                   <td className="py-3 px-4 text-center">
                     <div className="flex justify-center space-x-2">
@@ -55,12 +65,10 @@ function Table({ data, columns, onEdit, onDelete }) {
                       {onDelete && (
                         <button
                           onClick={() => {
-                            // Verifica se row.id existe antes de chamar onDelete
                             if (row.id) {
                               onDelete(row.id);
                             } else {
                               console.warn('Tentativa de excluir item sem ID:', row);
-                              // Opcional: mostrar um alerta ao usuário ou tratar de outra forma
                             }
                           }}
                           className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md transition duration-200 text-sm"

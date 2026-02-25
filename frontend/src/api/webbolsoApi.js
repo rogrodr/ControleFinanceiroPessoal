@@ -1,39 +1,35 @@
 import axios from 'axios';
 
-// Cria uma instância do Axios com a URL base do seu backend
 const webbolsoApi = axios.create({
-  baseURL: 'http://localhost:8080/api', // A URL base do seu backend Spring Boot
+  baseURL: 'http://localhost:8080/api',
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-// Interceptor para adicionar o token JWT a todas as requisições autenticadas
-webbolsoApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+// Interceptor para lidar com erros de autenticação
+webbolsoApi.interceptors.response.use(
+  (response) => {
+    // Se a resposta for bem-sucedida, apenas retorna
+    return response;
   },
   (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Interceptor para lidar com erros de resposta, por exemplo, token expirado
-webbolsoApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // Se for um erro 401 (Unauthorized), pode ser token expirado ou inválido
-      // Aqui você pode forçar o logout do usuário
-      console.warn("Erro 401: Token inválido ou expirado. Redirecionando para login.");
+    // Se houver erro 401 (Unauthorized) ou 403 (Forbidden)
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      console.error('webbolsoApi: Token inválido ou expirado. Redirecionando para login...');
+      
+      // Limpa o localStorage
       localStorage.removeItem('jwtToken');
-      // Redireciona para a página de login. Em uma aplicação real, você usaria um router.
-      // window.location.href = '/'; // Isso forçaria um reload e levaria ao login
+      localStorage.removeItem('username');
+      
+      // Remove o header de autorização
+      delete webbolsoApi.defaults.headers.common['Authorization'];
+      
+      // Redireciona para a página de login
+      window.location.href = '/login';
     }
+    
+    // Rejeita a promise para que o erro possa ser tratado no catch
     return Promise.reject(error);
   }
 );

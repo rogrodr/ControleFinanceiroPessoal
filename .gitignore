@@ -1,0 +1,20 @@
+# Java / Maven (Pasta de compilação)
+**/target/
+**/*.class
+**/maven-status/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+**/build/
+.env
+
+# Outros
+.DS_Store

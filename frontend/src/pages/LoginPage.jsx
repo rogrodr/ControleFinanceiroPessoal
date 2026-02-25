@@ -72,7 +72,7 @@ function LoginPage({ onRegisterClick }) {
       </form>
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Não tem uma conta?{' '}
+          Não tem uma Conta?{' '}
           <button
             onClick={onRegisterClick}
             className="font-medium text-blue-600 hover:text-blue-500 hover:underline"

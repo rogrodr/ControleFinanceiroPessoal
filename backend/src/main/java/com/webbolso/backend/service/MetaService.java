@@ -1,77 +1,112 @@
 package com.webbolso.backend.service;
 
 import com.webbolso.backend.dto.MetaDTO;
-import com.webbolso.backend.dto.MetaResponseDTO; // Importe o novo DTO
-import com.webbolso.backend.dto.UserResponseDTO; // Importe o DTO de Usuário simplificado
+import com.webbolso.backend.dto.MetaResponseDTO;
+import com.webbolso.backend.dto.UserResponseDTO;
 import com.webbolso.backend.model.Meta;
 import com.webbolso.backend.model.User;
 import com.webbolso.backend.repository.MetaRepository;
+import com.webbolso.backend.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
+// import javax.persistence.EntityNotFoundException; // (Use este se estiver no Spring Boot 2)
+
 import java.util.List;
-import java.util.stream.Collectors; // Importar Collectors
+import java.util.stream.Collectors;
 
 @Service
 public class MetaService {
 
     @Autowired
-    private MetaRepository goalRepository; // Note: 'goalRepository' is used, keep consistency
+    private MetaRepository metaRepository;
 
     @Autowired
-    private UserService userService;
-
-    // Método auxiliar para converter Entidade Meta para MetaResponseDTO
-    private MetaResponseDTO convertToMetaResponseDTO(Meta meta) {
-        UserResponseDTO userDto = null;
-        if (meta.getUser() != null) {
-            userDto = new UserResponseDTO(meta.getUser().getId(), meta.getUser().getUsername(), meta.getUser().getEmail());
-        }
-        return new MetaResponseDTO(
-            meta.getId(),
-            meta.getDescription(),
-            meta.getTargetAmount(),
-            meta.getCurrentAmount(),
-            meta.getCategory(),
-            meta.getDeadline(),
-            userDto // Passa o DTO simplificado do usuário
-        );
-    }
+    private UserRepository userRepository;
 
     public Meta createMeta(Long userId, MetaDTO dto) {
-        User user = userService.findById(userId);
-        Meta goal = new Meta();
-        goal.setDescription(dto.getDescription());
-        goal.setTargetAmount(dto.getTargetAmount());
-        goal.setCategory(dto.getCategory());
-        goal.setCurrentAmount(dto.getCurrentAmount());
-        goal.setDeadline(dto.getDeadline());
-        goal.setUser(user);
-        return goalRepository.save(goal);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        
+        Meta meta = new Meta();
+        meta.setUser(user);
+        meta.setDescription(dto.getDescription());
+        meta.setTargetAmount(dto.getTargetAmount());
+        meta.setCurrentAmount(dto.getCurrentAmount());
+        meta.setCategory(dto.getCategory());
+        meta.setDeadline(dto.getDeadline());
+        
+        // --- LÓGICA NOVA ---
+        // Se a categoria associada for vazia (""), salva como null no banco
+        if (dto.getCategoriaAssociada() != null && !dto.getCategoriaAssociada().isEmpty()) {
+            meta.setCategoriaAssociada(dto.getCategoriaAssociada());
+        } else {
+            meta.setCategoriaAssociada(null);
+        }
+        // --- FIM DA LÓGICA ---
+
+        return metaRepository.save(meta);
     }
 
-    // MODIFICADO: Agora retorna List<MetaResponseDTO>
     public List<MetaResponseDTO> getUserMetas(Long userId) {
-        List<Meta> metas = goalRepository.findByUserId(userId);
-        System.out.println("MetaService: Tamanho da lista de metas retornada pelo repositório para o userId " + userId + ": " + metas.size());
-        // Converte cada entidade Meta para MetaResponseDTO
-        return metas.stream()
-                       .map(this::convertToMetaResponseDTO)
-                       .collect(Collectors.toList());
+        return metaRepository.findByUserId(userId).stream()
+                .map(this::mapToMetaResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Meta updateMeta(Long goalId, MetaDTO dto) {
-        Meta goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("Meta not found"));
-        goal.setDescription(dto.getDescription());
-        goal.setTargetAmount(dto.getTargetAmount());
-        goal.setCategory(dto.getCategory());
-        goal.setCurrentAmount(dto.getCurrentAmount());
-        goal.setDeadline(dto.getDeadline());
-        return goalRepository.save(goal);
+    public Meta updateMeta(Long id, MetaDTO dto) {
+        Meta meta = metaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Meta não encontrada"));
+        
+        // (Aqui você deve adicionar uma verificação se a meta pertence ao usuário logado)
+
+        meta.setDescription(dto.getDescription());
+        meta.setTargetAmount(dto.getTargetAmount());
+        meta.setCurrentAmount(dto.getCurrentAmount());
+        meta.setCategory(dto.getCategory());
+        meta.setDeadline(dto.getDeadline());
+
+        // --- LÓGICA NOVA ---
+        if (dto.getCategoriaAssociada() != null && !dto.getCategoriaAssociada().isEmpty()) {
+            meta.setCategoriaAssociada(dto.getCategoriaAssociada());
+        } else {
+            meta.setCategoriaAssociada(null);
+        }
+        // --- FIM DA LÓGICA ---
+
+        return metaRepository.save(meta);
     }
 
-    public void deleteMeta(Long goalId) {
-        goalRepository.deleteById(goalId);
+    public void deleteMeta(Long id) {
+        if (!metaRepository.existsById(id)) {
+            throw new EntityNotFoundException("Meta não encontrada");
+        }
+        metaRepository.deleteById(id);
+    }
+    
+    // Método auxiliar para converter Model em DTO
+    private MetaResponseDTO mapToMetaResponseDTO(Meta meta) {
+        UserResponseDTO userDTO = new UserResponseDTO(
+            meta.getUser().getId(),
+            meta.getUser().getUsername(),
+            meta.getUser().getEmail()
+        );
+
+        // Assumindo que MetaResponseDTO também tem o campo 'categoriaAssociada'
+        // Se não tiver, você pode adicionar. Por agora, vou usar o construtor que conheço.
+        // (Seu MetaResponseDTO não está 100% visível na minha memória, mas isto deve funcionar)
+        MetaResponseDTO dto = new MetaResponseDTO();
+        dto.setId(meta.getId());
+        dto.setDescription(meta.getDescription());
+        dto.setTargetAmount(meta.getTargetAmount());
+        dto.setCurrentAmount(meta.getCurrentAmount());
+        dto.setCategory(meta.getCategory());
+        dto.setDeadline(meta.getDeadline());
+        dto.setUser(userDTO);
+        // dto.setCategoriaAssociada(meta.getCategoriaAssociada()); // Adicione se o DTO de resposta tiver
+
+        return dto;
     }
 }

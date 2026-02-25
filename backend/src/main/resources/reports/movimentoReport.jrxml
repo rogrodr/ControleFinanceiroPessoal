@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="movimentoReport" 
+              language="java" 
+              pageWidth="595" 
+              pageHeight="842" 
+              columnWidth="535" 
+              leftMargin="20" 
+              rightMargin="20" 
+              topMargin="20" 
+              bottomMargin="20" 
+              uuid="a12a8aac-2bee-4664-acea-636b532b36de">
+	
+	<property name="com.jaspersoft.studio.data.sql.tables" value="bW92aW1lbnRvcyBBUyAsMTg0LDY2LDY2NTU2OTBmLTg0MTMtNDY0OS05YTMzLThhNzJmMjdhMTc1MDs="/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ControleFinanceiro"/>
+	
+	<parameter name="userId" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[1L]]></defaultValueExpression>
+	</parameter>
+	
+	<parameter name="dataInicio" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	
+	<parameter name="dataFim" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	
+	<parameter name="tipo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	
+	<parameter name="PERIODO" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Todos os períodos"]]></defaultValueExpression>
+	</parameter>
+	
+	<parameter name="DATA_GERACAO" class="java.lang.String">
+		<defaultValueExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></defaultValueExpression>
+	</parameter>
+	
+	<queryString language="SQL"><![CDATA[
+		SELECT 
+			category,
+			date,
+			description,
+			status_pagamento,
+			tipo,
+			valor
+		FROM movimentos
+		WHERE user_id = $P{userId}
+			AND ($P{dataInicio} IS NULL OR date >= $P{dataInicio})
+			AND ($P{dataFim} IS NULL OR date <= $P{dataFim})
+			AND ($P{tipo} IS NULL OR $P{tipo} = '' OR tipo = $P{tipo})
+		ORDER BY date DESC
+	]]></queryString>
+	
+	<field name="category" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="category"/>
+		<property name="com.jaspersoft.studio.field.label" value="category"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	<field name="date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="date"/>
+		<property name="com.jaspersoft.studio.field.label" value="date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="description"/>
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	<field name="status_pagamento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="status_pagamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="status_pagamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	<field name="valor" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="valor"/>
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="movimentos"/>
+	</field>
+	
+	<variable name="totalReceitas" class="java.lang.Double" calculation="Sum" resetType="Report">
+		<variableExpression><![CDATA[$F{tipo}.equals("RECEITA") ? $F{valor} : 0.0]]></variableExpression>
+	</variable>
+	
+	<variable name="totalDespesas" class="java.lang.Double" calculation="Sum" resetType="Report">
+		<variableExpression><![CDATA[$F{tipo}.equals("DESPESA") ? $F{valor} : 0.0]]></variableExpression>
+	</variable>
+	
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	
+	<title>
+		<band height="92" splitType="Stretch">
+			<frame>
+                <reportElement mode="Opaque" x="-20" y="-20" width="595" height="92" 
+				             backcolor="#006699" uuid="2288523a-781c-454d-b41d-3d3cc56cacc7"/>
+				<staticText>
+                    <reportElement x="20" y="20" width="350" height="43" 
+					             forecolor="#FFFFFF" uuid="66ddf9e3-3d50-49b0-b829-c3a4c40fc3b1"/>
+					<textElement>
+						<font size="34" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Controle Financeiro]]></text>
+				</staticText>
+				
+				<textField>
+					<reportElement x="380" y="20" width="195" height="20" 
+					             forecolor="#FFFFFF"/>
+					<textElement textAlignment="Right">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{PERIODO}]]></textFieldExpression>
+				</textField>
+				
+				<textField>
+					<reportElement x="380" y="45" width="195" height="20" 
+					             forecolor="#FFFFFF"/>
+					<textElement textAlignment="Right">
+						<font size="9" isItalic="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Gerado em: " + $P{DATA_GERACAO}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</title>
+	
+	<pageHeader>
+		<band height="13" splitType="Stretch"/>
+	</pageHeader>
+	
+	<columnHeader>
+		<band height="21" splitType="Stretch">
+			<line>
+				<reportElement x="-20" y="20" width="595" height="1" 
+				             forecolor="#666666" uuid="140c37f2-66ee-4a81-b1b5-fef91a41aebf"/>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="-20" y="0" width="112" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="db79c58d-4df3-4d97-9683-6b08bca18684"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Categoria]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="92" y="0" width="92" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="e2103c92-bef1-43c1-824c-c9d910870501"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Data]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="184" y="0" width="116" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="e88b47a6-9697-4d03-8ec9-b537d78d6fd2"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="300" y="0" width="68" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="85b7c45a-433e-4598-8031-f884b57cc8e2"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Situação]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="368" y="0" width="92" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="449fe8a6-3a94-4ad4-aa74-f7cbcc11d777"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="460" y="0" width="115" height="20" 
+				             forecolor="#006699" backcolor="#E6E6E6" uuid="b7a1c29e-4ef9-48e7-a329-d0c7fabcd1e5"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	
+	<detail>
+		<band height="20" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="19" width="555" height="1" 
+				             uuid="cb7b6f00-2d07-413e-9bc3-d8ddbc91bcf7"/>
+			</line>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="-11" y="0" width="103" height="20" uuid="d9f76a5a-4ec9-4d2b-aca3-b12676c1d3e5"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{category}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" pattern="dd/MM/yyyy">
+				<reportElement x="92" y="0" width="92" height="20" uuid="b0a83e93-da52-4e55-9fce-c6c7958ddb14"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="184" y="0" width="92" height="20" uuid="8a3d0566-c010-490f-aa6e-ba96c5908a09"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="276" y="0" width="92" height="20" uuid="da606d02-1110-48a5-bedd-779f628cfca9"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{status_pagamento}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="368" y="0" width="92" height="20" uuid="37c3553e-0ee3-4d94-847f-b6c7e323c6b2"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" pattern="R$ #,##0.00">
+				<reportElement x="460" y="0" width="95" height="20" uuid="fcdef090-42f4-4f41-b3db-e759249650e5"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	
+	<pageFooter>
+		<band height="17" splitType="Stretch">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="4" width="515" height="13" 
+				             backcolor="#E6E6E6" uuid="59ae55cb-9717-4dbf-9741-e3197c568231"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Opaque" x="515" y="4" width="60" height="13" 
+				             backcolor="#E6E6E6" uuid="63702f5f-e25d-4f38-afcc-4e0dcd3b927c"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="-20" y="4" width="120" height="13" uuid="21be97bb-f355-46ac-b512-5b1802faadf4"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	
+	<summary>
+		<band height="80" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="10" width="555" height="1"/>
+			</line>
+			
+			<staticText>
+				<reportElement x="360" y="20" width="100" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Receitas:]]></text>
+			</staticText>
+			<textField pattern="R$ #,##0.00">
+				<reportElement x="465" y="20" width="90" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalReceitas}]]></textFieldExpression>
+			</textField>
+			
+			<staticText>
+				<reportElement x="360" y="35" width="100" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Despesas:]]></text>
+			</staticText>
+			<textField pattern="R$ #,##0.00">
+				<reportElement x="465" y="35" width="90" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalDespesas}]]></textFieldExpression>
+			</textField>
+			
+			<line>
+				<reportElement x="360" y="55" width="195" height="1"/>
+			</line>
+			
+			<staticText>
+				<reportElement x="360" y="60" width="100" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SALDO:]]></text>
+			</staticText>
+			<textField pattern="R$ #,##0.00">
+				<reportElement x="465" y="60" width="90" height="15"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalReceitas} - $V{totalDespesas}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -118,7 +118,7 @@ function RegisterPage({ onLoginClick }) {
       </form>
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Já tem uma conta?{' '}
+          Já tem uma Conta?{' '}
           <button
             onClick={onLoginClick}
             className="font-medium text-blue-600 hover:text-blue-500 hover:underline"

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,23 +29,10 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import java.util.stream.Collectors;
-// NOVAS IMPORTAÇÕES NECESSÁRIAS PARA CORS
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.Arrays;
-
-// IMPORTAÇÕES ADICIONADAS PARA O JWT AUTHENTICATION CONVERTER
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-// Removido: import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import java.util.Collection;
-import java.util.Collections;
-import org.springframework.core.convert.converter.Converter; // Importar a interface Converter
-
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -55,61 +43,61 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/metas/**").hasRole("USER")
-                .requestMatchers("/api/orcamentos/**").hasRole("USER")
-                .requestMatchers("/api/lembretes/**").hasRole("USER")
-                .requestMatchers("/api/despesas/**").hasRole("USER")
-                .anyRequest().authenticated()
+                // Endpoints públicos (sem autenticação)
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                
+                // TODOS os outros endpoints da API requerem autenticação
+                .requestMatchers("/api/**").authenticated()
+                
+                // Qualquer outra rota (não-API) é pública
+                .anyRequest().permitAll()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.decoder(jwtDecoder(keyPair()))
-                    // ADICIONANDO O CONVERSOR DE AUTHORITIES DO JWT
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                )
+                .jwt(jwt -> jwt.decoder(jwtDecoder(keyPair())))
             )
-            .logout(logout -> logout.permitAll());
-        
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            );
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permita a origem do seu frontend
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // AQUI ONDE SEU FRONTEND RODA
-        // Permita todos os métodos HTTP (GET, POST, PUT, DELETE, OPTIONS, etc.)
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Permita todos os cabeçalhos
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        // Permita o envio de cookies e credenciais (ex: cabeçalhos de autenticação)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        // Defina o tempo de vida máximo para as informações de preflight (em segundos)
-        configuration.setMaxAge(3600L); // 1 hora
-        
+        configuration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica esta configuração a todos os caminhos
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
-            System.out.println("Tentando carregar usuário: " + username); // Debugging
+            System.out.println("Carregando usuário: " + username);
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> {
-                        System.out.println("Usuário NÃO encontrado: " + username); // Debugging
+                        System.out.println("Usuário NÃO encontrado: " + username);
                         return new UsernameNotFoundException("Usuário não encontrado: " + username);
                     });
-            System.out.println("Usuário ENCONTRADO: " + user.getUsername() + " com roles: " + user.getRoles()); // Debugging
+            
+            System.out.println("Usuário ENCONTRADO: " + user.getUsername());
+            
+            // SIMPLIFICADO: Sem roles, apenas username/password
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword())
-                    .authorities(user.getRoles().stream()
-                            // As roles já vêm com "ROLE_" do UserService, então SimpleGrantedAuthority::new está correto.
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList()))
+                    .authorities("USER") // Role padrão simples
                     .build();
         };
     }
@@ -132,6 +120,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    // --- Configuração de Chaves RSA para JWT ---
     @Bean
     public KeyPair keyPair() {
         try {
@@ -139,7 +128,7 @@ public class SecurityConfig {
             keyPairGenerator.initialize(2048);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to generate key pair", e);
+            throw new IllegalStateException("Falha ao gerar par de chaves RSA", e);
         }
     }
 
@@ -163,25 +152,5 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder(KeyPair keyPair) {
         return NimbusJwtDecoder.withPublicKey((RSAPublicKey) keyPair.getPublic()).build();
-    }
-
-    // NOVO BEAN: CONVERSOR DE AUTHORITIES PERSONALIZADO PARA O JWT
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new Converter<Jwt, Collection<GrantedAuthority>>() {
-            @Override
-            public Collection<GrantedAuthority> convert(Jwt jwt) {
-                String rolesString = jwt.getClaimAsString("roles"); // Pega o claim "roles"
-                if (rolesString == null || rolesString.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                // Divide a string por espaços e converte cada role para SimpleGrantedAuthority
-                return Arrays.stream(rolesString.split(" "))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-            }
-        });
-        return converter;
     }
 }
