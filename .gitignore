@@ -1,20 +1,38 @@
-# Java / Maven (Pasta de compilação)
+# --- Java / Maven ---
+target/
 **/target/
 **/*.class
 **/maven-status/
+*.jar
+*.war
 
-# IntelliJ IDEA
+# --- Segurança e Configurações Sensíveis (IMPORTANTE) ---
+# Bloqueia o arquivo com suas senhas do Postgres
+**/src/main/resources/application.properties
+**/src/main/resources/application.yml
+.env
+*.log
+
+# --- IDEs (IntelliJ, VS Code, Eclipse) ---
 .idea/
 *.iml
-
-# VS Code
 .vscode/
+.settings/
+.classpath
+.project
+.factorypath
 
-# Node / Frontend
+# --- Node.js / Frontend ---
+node_modules/
 **/node_modules/
+dist/
 **/dist/
+build/
 **/build/
-.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Outros
+# --- Sistema Operacional ---
 .DS_Store
+Thumbs.db
