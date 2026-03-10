@@ -1,4 +1,4 @@
-# 💰 Controle Financeiro Pessoal
+# Controle Financeiro Pessoal
 **Projeto nota 100 em Atividade de Extensão / Projeto Integrador** 🏆
 
 Sistema Fullstack completo para gestão de finanças pessoais, unindo uma arquitetura robusta no backend com uma interface moderna e visual no frontend.
@@ -28,7 +28,7 @@ Sistema Fullstack completo para gestão de finanças pessoais, unindo uma arquit
 
 ---
 
-## 🚀 Diferenciais Técnicos e Funcionalidades
+## Diferenciais Técnicos e Funcionalidades
 
 Este projeto foi desenvolvido aplicando as melhores práticas de engenharia de software:
 
@@ -40,7 +40,7 @@ Este projeto foi desenvolvido aplicando as melhores práticas de engenharia de s
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 ### **Backend**
 * **Linguagem:** Java.
@@ -54,7 +54,7 @@ Este projeto foi desenvolvido aplicando as melhores práticas de engenharia de s
 
 ---
 
-## 📁 Estrutura do Repositório
+## Estrutura do Repositório
 
 O repositório está organizado de forma modular para facilitar a manutenção e escalabilidade:
 
@@ -64,5 +64,5 @@ O repositório está organizado de forma modular para facilitar a manutenção e
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 Desenvolvido por **rogrodr (Robson)**.
