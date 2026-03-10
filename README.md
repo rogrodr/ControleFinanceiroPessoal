@@ -1,5 +1,5 @@
 # Controle Financeiro Pessoal
-**Projeto nota 100 em Atividade de Extensão / Projeto Integrador** 🏆
+**Projeto nota 10.0 em Atividade de Extensão / Projeto Integrador** 
 
 Sistema Fullstack completo para gestão de finanças pessoais, unindo uma arquitetura robusta no backend com uma interface moderna e visual no frontend.
 
